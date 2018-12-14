@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
+#include "waitabletimer.h"
 
 // Конструктор:
 MainWindow::MainWindow(QWidget *parent) :
@@ -25,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->timeEditBootUp->setTime(QTime::currentTime());
 
     // По умолчанию выключить элементы интерфейса для выбора даты/времени включения компьютера:
+    ui->checkBoxBootUp->setEnabled(false);
     ui->dateEditBootUp->setEnabled(false);
     ui->timeEditBootUp->setEnabled(false);
 
@@ -52,6 +54,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Установка флажка включения компьютера:
     QObject::connect(ui->checkBoxBootUp, SIGNAL(clicked(bool)), this, SLOT(handleCheckBoxBootUp(bool)));
+
+    mTimer = new QTimer(this);
+    mTimer->setSingleShot(true);
+    connect(mTimer, SIGNAL(timeout()), SLOT(doStuff()));
 }
 
 // Деструктор:
@@ -69,6 +75,9 @@ MainWindow::~MainWindow()
 // Обработчик события нажатия на кнопку "Применить":
 void MainWindow::handlePushButtonApply()
 {
+    taskService->delTask(SHUT_DOWN_TASK_NAME);
+    taskService->delTask(BOOT_UP_TASK_NAME);
+
     // Получаем дату/время выключения компьютера в строковом виде:
     dateTimeShutDown = QString("%1T%2").arg(
         ui->dateEditShutDown->date().toString("yyyy-MM-dd"),
@@ -104,17 +113,24 @@ void MainWindow::handlePushButtonApply()
 //        qDebug() << "dateTime =" << QString::fromWCharArray(dateTime, dateTimeLen);
 //        LPCWSTR dateTime = L"2018-12-11T00:50:00";
 
+        if (!ui->checkBoxBootUp->isChecked())
+        {
         // Создание задания на выключение компьютера:
-        Task(
-                    TASK_ACTION_EXEC,  // тип задания.
-                    SHUT_DOWN_TASK_NAME,  // наименование задания.
-                    wstrExecutablePath,  // путь к запускаемой программе.
-                    args,  // аргументы запускаемой программы.
-                    authorName,  // имя автора.
-                    dateTime,  // дата начала.
-//                    dateTime,  // дата конца.
-                    false  // пробуждать компьютер для выполнения задания?
-        );
+            Task(
+                        TASK_ACTION_EXEC,  // тип задания.
+                        SHUT_DOWN_TASK_NAME,  // наименование задания.
+                        wstrExecutablePath,  // путь к запускаемой программе.
+                        args,  // аргументы запускаемой программы.
+                        authorName,  // имя автора.
+                        dateTime,  // дата начала.
+//                        dateTime,  // дата конца.
+                        false  // пробуждать компьютер для выполнения задания?
+            );
+        }
+        else
+        {
+            startOrResetTimer();
+        }
     }
     // Иначе, если флажок выключения компьютера снят:
     else
@@ -154,6 +170,7 @@ void MainWindow::handlePushButtonApply()
 
         // Показать окно сообщения при пробуждении:
 //        Task(TASK_ACTION_SHOW_MESSAGE, BOOT_UP_TASK_NAME, L"Приветствие", L"Добро пожаловать!", authorName, dateTime, dateTime, true);
+
     }
     // Иначе, если флажок включения компьютера снят:
     else
@@ -164,6 +181,8 @@ void MainWindow::handlePushButtonApply()
 
     // Включаем кнопку "Отменить всё":
     ui->pushButtonCancelAll->setEnabled(true);
+
+    ui->pushButtonApply->setEnabled(false);
 }
 
 // Обработчик события нажатия на кнопку "Отменить всё":
@@ -177,6 +196,10 @@ void MainWindow::handlePushButtonCancelAll()
 
     // Выключаем кнопку "Отменить всё" после нажатия:
     ui->pushButtonCancelAll->setEnabled(false);
+
+    ui->pushButtonApply->setEnabled(true);
+
+    mTimer->stop();
 }
 
 // Обработчик события нажатия на флажок "Выключить компьютер":
@@ -189,6 +212,8 @@ void MainWindow::handleCheckBoxShutDown(bool checked)
         ui->dateEditShutDown->setEnabled(true);
         ui->timeEditShutDown->setEnabled(true);
         ui->pushButtonApply->setEnabled(true);
+
+        ui->checkBoxBootUp->setEnabled(true);
     }
     // В другом случае:
     else
@@ -197,18 +222,10 @@ void MainWindow::handleCheckBoxShutDown(bool checked)
         ui->dateEditShutDown->setEnabled(false);
         ui->timeEditShutDown->setEnabled(false);
 
-        // Если флажок "Включить компьютер" поставлен:
-        if (ui->checkBoxBootUp->isChecked())
-        {
-            // Включаем кнопку "Применить":
-            ui->pushButtonApply->setEnabled(true);
-        }
-        // В другом случае:
-        else
-        {
-            // Выключаем кнопку "Применить":
-            ui->pushButtonApply->setEnabled(false);
-        }
+        ui->checkBoxBootUp->setEnabled(false);
+        ui->checkBoxBootUp->setChecked(false);
+
+        ui->pushButtonApply->setEnabled(false);
     }
 }
 
@@ -229,18 +246,29 @@ void MainWindow::handleCheckBoxBootUp(bool checked)
         // Выключаем соответствующие элементы интерфейса:
         ui->dateEditBootUp->setEnabled(false);
         ui->timeEditBootUp->setEnabled(false);
-
-        // Если флажок "Выключить компьютер" поставлен:
-        if (ui->checkBoxShutDown->isChecked())
-        {
-            // Включаем кнопку "Применить":
-            ui->pushButtonApply->setEnabled(true);
-        }
-        // В другом случае:
-        else
-        {
-            // Выключаем кнопку "Применить":
-            ui->pushButtonApply->setEnabled(false);
-        }
     }
+}
+
+void MainWindow::startOrResetTimer()
+{
+    QDateTime now = QDateTime::currentDateTime();
+    QDateTime shutdown = QDateTime::fromString(dateTimeShutDown, "yyyy-MM-ddTHH:mm:ss");
+    qint64 millisecondsDiff = now.msecsTo(shutdown);
+    qint64 secondsDiff = millisecondsDiff / 1000;
+    qDebug() << "secondsDiff = " << secondsDiff;
+
+    mTimer->start(millisecondsDiff);
+}
+
+void MainWindow::doStuff()
+{
+    qDebug() << "Shut Down...";
+
+    QDateTime now = QDateTime::currentDateTime();
+    QDateTime boot = QDateTime::fromString(dateTimeBootUp, "yyyy-MM-ddTHH:mm:ss");
+    qint64 millisecondsDiff = now.msecsTo(boot);
+    qint64 secondsDiff = millisecondsDiff / 1000;
+    qDebug() << "secondsDiff = " << secondsDiff;
+
+//    WaitableTimer::HibernateAndReboot(secondsDiff);
 }

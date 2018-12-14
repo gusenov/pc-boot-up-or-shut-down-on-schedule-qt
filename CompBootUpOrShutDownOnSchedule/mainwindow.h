@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "task.h"
+#include <QTimer>
 
 // Имя автора задания для планировщика заданий:
 #define DEFAULT_AUTHOR_NAME L"user"
@@ -47,7 +48,11 @@ private slots:
    // Обработчик события нажатия на флажок "Включить компьютер":
    void handleCheckBoxBootUp(bool checked);
 
+   void doStuff();
+
 private:
+
+    void startOrResetTimer();
 
     Ui::MainWindow *ui;
 
@@ -72,6 +77,7 @@ private:
     // Длина имени автора:
     DWORD authorNameLen = BUFF_LEN;
 
+    QTimer* mTimer;
 };
 
 #endif // MAINWINDOW_H

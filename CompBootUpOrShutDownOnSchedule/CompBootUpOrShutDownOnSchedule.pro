@@ -29,14 +29,16 @@ SOURCES += \
         mainwindow.cpp \
     taskservice.cpp \
     comstuff.cpp \
-    task.cpp
+    task.cpp \
+    waitabletimer.cpp
 
 HEADERS += \
         mainwindow.h \
     taskservice.h \
     comstuff.h \
     task.h \
-    ishowmessageaction.h
+    ishowmessageaction.h \
+    waitabletimer.h
 
 FORMS += \
         mainwindow.ui
