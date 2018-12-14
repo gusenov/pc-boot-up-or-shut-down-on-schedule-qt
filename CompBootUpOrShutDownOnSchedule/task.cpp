@@ -300,7 +300,7 @@ IIdleSettings* Task::getIdleSettingsForTask(ITaskSettings *pSettings)
 // Установить настройки простоя для задания:
 int Task::setIdleSettingsForTask(IIdleSettings* pIdleSettings)
 {
-    hr = pIdleSettings->put_WaitTimeout(L"PT5M");
+    hr = pIdleSettings->put_WaitTimeout(_bstr_t(L"PT5M"));
 
     if (FAILED(hr))
     {
