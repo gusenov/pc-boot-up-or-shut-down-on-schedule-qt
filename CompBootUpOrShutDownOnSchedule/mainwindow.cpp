@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include "waitabletimer.h"
+#include <QMessageBox>
 
 // Конструктор:
 MainWindow::MainWindow(QWidget *parent) :
@@ -33,13 +34,8 @@ MainWindow::MainWindow(QWidget *parent) :
     // По умолчанию выключить кнопку "Применить":
     ui->pushButtonApply->setEnabled(false);
 
-    // Получаем имя текущего пользователя системы:
-    authorName = new wchar_t[authorNameLen];
-    GetUserName(authorName, &authorNameLen);
-//    qDebug() << "authorName =" << QString::fromWCharArray(authorName, (int)authorNameLen);
-
-    // Получаем сервис для получения доступа к планировщику заданий:
-    taskService = &TaskService::instance();
+    // По умолчанию выключить кнопку "Отменить всё":
+    ui->pushButtonCancelAll->setEnabled(false);
 
     // Связываем элементы интерфейса с обработчиками их событий:
 
@@ -55,19 +51,38 @@ MainWindow::MainWindow(QWidget *parent) :
     // Установка флажка включения компьютера:
     QObject::connect(ui->checkBoxBootUp, SIGNAL(clicked(bool)), this, SLOT(handleCheckBoxBootUp(bool)));
 
-    mTimer = new QTimer(this);
-    mTimer->setSingleShot(true);
-    connect(mTimer, SIGNAL(timeout()), SLOT(doStuff()));
+    // Таймер для отсчета времени до выключения:
+    timerShutDown = new QTimer(this);
+    timerShutDown->setSingleShot(true);
+    connect(timerShutDown, SIGNAL(timeout()), SLOT(doShutDown()));
+
+    // Таймер для обратного отсчета секунд:
+    timerCountDown = new QTimer(this);
+    connect(timerCountDown, SIGNAL(timeout()), SLOT(doCountDown()));
 }
 
 // Деструктор:
 MainWindow::~MainWindow()
 {
-    // Освобождение памяти занятой под имя пользователя:
-    if (authorName != nullptr)
-    {
-        delete[] authorName;
-    }
+    // Таймер для отсчета времени до выключения:
+
+    // Остановка таймера:
+    if (timerShutDown->isActive())
+        timerShutDown->stop();
+
+    // Освобождеие памяти:
+    delete timerShutDown;
+
+
+    // Таймер для обратного отсчета секунд:
+
+    // Остановка таймера:
+    if (timerCountDown->isActive())
+        timerCountDown->stop();
+
+    // Освобождеие памяти:
+    delete timerCountDown;
+
 
     delete ui;
 }
@@ -75,131 +90,69 @@ MainWindow::~MainWindow()
 // Обработчик события нажатия на кнопку "Применить":
 void MainWindow::handlePushButtonApply()
 {
-    taskService->delTask(SHUT_DOWN_TASK_NAME);
-    taskService->delTask(BOOT_UP_TASK_NAME);
-
     // Получаем дату/время выключения компьютера в строковом виде:
-    dateTimeShutDown = QString("%1T%2").arg(
+    strDateTimeShutDown = QString("%1T%2").arg(
         ui->dateEditShutDown->date().toString("yyyy-MM-dd"),
         ui->timeEditShutDown->time().toString("HH:mm:ss")
     );
 
     // Получаем дату/время включения компьютера в строковом виде:
-    dateTimeBootUp = QString("%1T%2").arg(
+    strDateTimeBootUp = QString("%1T%2").arg(
         ui->dateEditBootUp->date().toString("yyyy-MM-dd"),
         ui->timeEditBootUp->time().toString("HH:mm:ss")
     );
 
-    // Если флажок выключения компьютера установлен:
-    if (ui->checkBoxShutDown->isChecked())
+    if (startOrResetShutDownTimer())
     {
-        // Путь к программе rundll32.exe:
-        wstring wstrExecutablePath = _wgetenv(L"WINDIR");
-        wstrExecutablePath += L"\\SYSTEM32\\rundll32.exe";
+        ui->checkBoxShutDown->setEnabled(false);
+        ui->dateEditShutDown->setEnabled(false);
+        ui->timeEditShutDown->setEnabled(false);
 
-        // Аргументы для запуска программы rundll32.exe:
+        ui->checkBoxBootUp->setEnabled(false);
+        ui->dateEditBootUp->setEnabled(false);
+        ui->timeEditBootUp->setEnabled(false);
 
-        // Блокировать:
-//        wstring args = L"user32.dll,LockWorkStation";
+        // Выключаем кнопку "Применить":
+        ui->pushButtonApply->setEnabled(false);
 
-        // Перейти в ждущий режим:
-        wstring args = L"powrprof.dll,SetSuspendState 0,1,0";
-
-        // Сигнатура функции SetSuspendState:
-        // BOOLEAN SetSuspendState(BOOLEAN bHibernate, BOOLEAN bForce, BOOLEAN bWakeupEventsDisabled);
-
-        // Время перехода в спящий режим:
-        dateTimeLen = dateTimeShutDown.toWCharArray(dateTime);
-//        qDebug() << "dateTime =" << QString::fromWCharArray(dateTime, dateTimeLen);
-//        LPCWSTR dateTime = L"2018-12-11T00:50:00";
-
-        if (!ui->checkBoxBootUp->isChecked())
-        {
-        // Создание задания на выключение компьютера:
-            Task(
-                        TASK_ACTION_EXEC,  // тип задания.
-                        SHUT_DOWN_TASK_NAME,  // наименование задания.
-                        wstrExecutablePath,  // путь к запускаемой программе.
-                        args,  // аргументы запускаемой программы.
-                        authorName,  // имя автора.
-                        dateTime,  // дата начала.
-//                        dateTime,  // дата конца.
-                        false  // пробуждать компьютер для выполнения задания?
-            );
-        }
-        else
-        {
-            startOrResetTimer();
-        }
+        // Включаем кнопку "Отменить всё":
+        ui->pushButtonCancelAll->setEnabled(true);
     }
-    // Иначе, если флажок выключения компьютера снят:
-    else
-    {
-        // Удалить задание на выключение компьютера:
-        taskService->delTask(SHUT_DOWN_TASK_NAME);
-    }
-
-    // Если флажок включения компьютера установлен:
-    if (ui->checkBoxBootUp->isChecked())
-    {
-        // Путь к программе Проводник:
-        wstring wstrExecutablePath = _wgetenv(L"WINDIR");
-        wstrExecutablePath += L"\\explorer.exe";
-
-        // Аргументы для запуска:
-        wstring args = L"";
-
-        // Время пробуждения:
-        dateTimeLen = dateTimeBootUp.toWCharArray(dateTime);
-//        qDebug() << "dateTime =" << QString::fromWCharArray(dateTime, dateTimeLen);
-//        LPCWSTR dateTime = L"2018-12-11T23:30:00";
-
-        // Создание задания на включение компьютера:
-
-        // Запустить Проводник при пробуждении:
-        Task(
-                    TASK_ACTION_EXEC,  // тип задания.
-                    BOOT_UP_TASK_NAME,  // наименование задания.
-                    wstrExecutablePath,  // путь к запускаемой программе.
-                    args,  // аргументы запускаемой программы.
-                    authorName,  // имя автора.
-                    dateTime,  // дата начала.
-//                    dateTime,  // дата конца.
-                    true  // пробуждать компьютер для выполнения задания?
-        );
-
-        // Показать окно сообщения при пробуждении:
-//        Task(TASK_ACTION_SHOW_MESSAGE, BOOT_UP_TASK_NAME, L"Приветствие", L"Добро пожаловать!", authorName, dateTime, dateTime, true);
-
-    }
-    // Иначе, если флажок включения компьютера снят:
-    else
-    {
-        // Удалить задание на включение компьютера:
-        taskService->delTask(BOOT_UP_TASK_NAME);
-    }
-
-    // Включаем кнопку "Отменить всё":
-    ui->pushButtonCancelAll->setEnabled(true);
-
-    ui->pushButtonApply->setEnabled(false);
 }
 
 // Обработчик события нажатия на кнопку "Отменить всё":
 void MainWindow::handlePushButtonCancelAll()
 {
-    // Удаляем задание на выключение компьютера:
-    taskService->delTask(SHUT_DOWN_TASK_NAME);
+    ui->checkBoxShutDown->setEnabled(true);
+    if (ui->checkBoxShutDown->isChecked())
+    {
+        ui->dateEditShutDown->setEnabled(true);
+        ui->timeEditShutDown->setEnabled(true);
+    }
 
-    // Удаляем задание на включение компьютера:
-    taskService->delTask(BOOT_UP_TASK_NAME);
+    ui->checkBoxBootUp->setEnabled(true);
+    if (ui->checkBoxBootUp->isChecked())
+    {
+        ui->dateEditBootUp->setEnabled(true);
+        ui->timeEditBootUp->setEnabled(true);
+    }
+
+    // Включаем кнопку "Применить":
+    ui->pushButtonApply->setEnabled(true);
 
     // Выключаем кнопку "Отменить всё" после нажатия:
     ui->pushButtonCancelAll->setEnabled(false);
 
-    ui->pushButtonApply->setEnabled(true);
+    // Останавливаем таймер отсчитывающий время до выключения:
+    if (timerShutDown->isActive())
+        timerShutDown->stop();
 
-    mTimer->stop();
+    // Останавливаем таймер обратного отсчета по секундам:
+    if (timerCountDown->isActive())
+        timerCountDown->stop();
+
+    // Очистить метку обратного отсчета:
+    ui->labelCountdown->setText("");
 }
 
 // Обработчик события нажатия на флажок "Выключить компьютер":
@@ -209,21 +162,27 @@ void MainWindow::handleCheckBoxShutDown(bool checked)
     if (checked)
     {
         // Включаем соответствующие элементы интерфейса:
+
         ui->dateEditShutDown->setEnabled(true);
         ui->timeEditShutDown->setEnabled(true);
-        ui->pushButtonApply->setEnabled(true);
 
         ui->checkBoxBootUp->setEnabled(true);
+
+        ui->pushButtonApply->setEnabled(true);
     }
+
     // В другом случае:
     else
     {
         // Выключаем соответствующие элементы интерфейса:
+
         ui->dateEditShutDown->setEnabled(false);
         ui->timeEditShutDown->setEnabled(false);
 
-        ui->checkBoxBootUp->setEnabled(false);
         ui->checkBoxBootUp->setChecked(false);
+        ui->checkBoxBootUp->setEnabled(false);
+        ui->dateEditBootUp->setEnabled(false);
+        ui->timeEditBootUp->setEnabled(false);
 
         ui->pushButtonApply->setEnabled(false);
     }
@@ -238,8 +197,8 @@ void MainWindow::handleCheckBoxBootUp(bool checked)
         // Включаем соответствующие элементы интерфейса:
         ui->dateEditBootUp->setEnabled(true);
         ui->timeEditBootUp->setEnabled(true);
-        ui->pushButtonApply->setEnabled(true);
     }
+
     // В другом случае:
     else
     {
@@ -249,26 +208,60 @@ void MainWindow::handleCheckBoxBootUp(bool checked)
     }
 }
 
-void MainWindow::startOrResetTimer()
+// Запустить таймер отсчитывающий время до выключения:
+bool MainWindow::startOrResetShutDownTimer()
 {
     QDateTime now = QDateTime::currentDateTime();
-    QDateTime shutdown = QDateTime::fromString(dateTimeShutDown, "yyyy-MM-ddTHH:mm:ss");
-    qint64 millisecondsDiff = now.msecsTo(shutdown);
-    qint64 secondsDiff = millisecondsDiff / 1000;
-    qDebug() << "secondsDiff = " << secondsDiff;
 
-    mTimer->start(millisecondsDiff);
+    QDateTime dateTimeShutDown = QDateTime::fromString(strDateTimeShutDown, "yyyy-MM-ddTHH:mm:ss");
+    millisecondsDiff = now.msecsTo(dateTimeShutDown);
+
+    QDateTime dateTimeBootUp = QDateTime::fromString(strDateTimeBootUp, "yyyy-MM-ddTHH:mm:ss");
+    secondsDiff = dateTimeShutDown.msecsTo(dateTimeBootUp) / 1000;
+
+    if (millisecondsDiff < 0 ||
+            (ui->checkBoxBootUp->isChecked() && secondsDiff < 0))
+    {
+        QMessageBox::warning(this, "Ошибка!", "Неправильная дата и время!", QMessageBox::Ok);
+        return false;
+    }
+    else
+    {
+        timerShutDown->start(millisecondsDiff);
+
+        // Начать обратный отсчёт:
+        timerCountDown->start(1000);
+
+        return true;
+    }
 }
 
-void MainWindow::doStuff()
+// Метод, который выполняется, когда наступает время выключения:
+void MainWindow::doShutDown()
 {
-    qDebug() << "Shut Down...";
+    timerCountDown->stop();
 
-    QDateTime now = QDateTime::currentDateTime();
-    QDateTime boot = QDateTime::fromString(dateTimeBootUp, "yyyy-MM-ddTHH:mm:ss");
-    qint64 millisecondsDiff = now.msecsTo(boot);
-    qint64 secondsDiff = millisecondsDiff / 1000;
-    qDebug() << "secondsDiff = " << secondsDiff;
+    // Если флажок включения компьютера установлен:
+    if (ui->checkBoxBootUp->isChecked())
+    {
+        ui->labelCountdown->setText("Shut Down & Boot Up");
+        qDebug() << "secondsDiff =" << secondsDiff;
+        WaitableTimer::HibernateAndReboot(secondsDiff);
+    }
 
-//    WaitableTimer::HibernateAndReboot(secondsDiff);
+    // Иначе, если удалось получить права на выключение компьютера:
+    else if (WaitableTimer::_EnableShutDownPriv())
+    {
+        ui->labelCountdown->setText("Shut Down");
+
+        // Выключить компьютер:
+        SetSystemPowerState(FALSE, FALSE);
+    }
+}
+
+// Метод, который выполняется при обратном отсчете времени:
+void MainWindow::doCountDown()
+{
+    ui->labelCountdown->setText(QString("%1").arg(millisecondsDiff / 1000));
+    millisecondsDiff -= 1000;
 }

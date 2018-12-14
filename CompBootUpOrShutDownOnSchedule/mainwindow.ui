@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>160</width>
-    <height>258</height>
+    <height>281</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -162,6 +162,22 @@
     </property>
     <property name="text">
      <string>Отменить всё</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelCountdown">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>258</y>
+      <width>140</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
   </widget>

@@ -2,20 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "task.h"
 #include <QTimer>
-
-// Имя автора задания для планировщика заданий:
-#define DEFAULT_AUTHOR_NAME L"user"
-
-// Наименование задания на выключение компьютера:
-#define SHUT_DOWN_TASK_NAME L"Time Trigger Computer Shut Down Task"
-
-// Наименование задания на включение компьютера:
-#define BOOT_UP_TASK_NAME L"Time Trigger Computer Boot Up Task"
-
-// Длина буфера по умолчанию:
-#define BUFF_LEN 20
 
 namespace Ui {
 class MainWindow;
@@ -48,36 +35,37 @@ private slots:
    // Обработчик события нажатия на флажок "Включить компьютер":
    void handleCheckBoxBootUp(bool checked);
 
-   void doStuff();
+   // Метод, который выполняется, когда наступает время выключения:
+   void doShutDown();
+
+   // Метод, который выполняется при обратном отсчете времени:
+   void doCountDown();
 
 private:
 
-    void startOrResetTimer();
+    // Запустить таймер отсчитывающий время до выключения:
+    bool startOrResetShutDownTimer();
 
+    // Графический интерфейс приложения:
     Ui::MainWindow *ui;
 
-    // Сервис для получения доступа к планировщику заданий:
-    TaskService* taskService;
-
     // Строковое представление даты и времени выключения компьютера:
-    QString dateTimeShutDown;
+    QString strDateTimeShutDown;
 
     // Строковое представление даты и времени включения компьютера:
-    QString dateTimeBootUp;
+    QString strDateTimeBootUp;
 
-    // Буфер для конвертирования даты и времени из QString типа в wchar_t* тип:
-    wchar_t dateTime[BUFF_LEN];
+    // Таймер для отсчета времени до выключения:
+    QTimer* timerShutDown;
 
-    // Длина конвертируемой строки:
-    int dateTimeLen;
+    // Таймер для обратного отсчета секунд:
+    QTimer* timerCountDown;
 
-    // Имя автора задания для планировщика:
-    wchar_t* authorName = nullptr;
+    // Разница в миллисекундах:
+    qint64 millisecondsDiff;
 
-    // Длина имени автора:
-    DWORD authorNameLen = BUFF_LEN;
-
-    QTimer* mTimer;
+    // Разница в секундах:
+    qint64 secondsDiff;
 };
 
 #endif // MAINWINDOW_H

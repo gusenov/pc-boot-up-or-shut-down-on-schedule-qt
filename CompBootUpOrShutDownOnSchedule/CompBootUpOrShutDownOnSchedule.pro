@@ -27,17 +27,10 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    taskservice.cpp \
-    comstuff.cpp \
-    task.cpp \
     waitabletimer.cpp
 
 HEADERS += \
         mainwindow.h \
-    taskservice.h \
-    comstuff.h \
-    task.h \
-    ishowmessageaction.h \
     waitabletimer.h
 
 FORMS += \

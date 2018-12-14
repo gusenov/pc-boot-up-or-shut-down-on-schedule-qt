@@ -1,15 +1,18 @@
 #include "waitabletimer.h"
 
-static BOOL WINAPI
-_EnableShutDownPriv()
+// Получение разрешений на выключений компьютера:
+BOOL WINAPI WaitableTimer::_EnableShutDownPriv()
 {
+    // Результирующее значение:
     BOOL ret = FALSE;
+
+    // Текущий процесс:
     HANDLE process = GetCurrentProcess();
+
+
     HANDLE token;
 
-    if(!OpenProcessToken(process
-                        , TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY
-                        , &token))
+    if (!OpenProcessToken(process, TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token))
         return FALSE;
 
     LUID luid;
@@ -19,39 +22,38 @@ _EnableShutDownPriv()
     priv.PrivilegeCount = 1;
     priv.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
     priv.Privileges[0].Luid = luid;
+
     ret = AdjustTokenPrivileges(token, FALSE, &priv, 0, nullptr, nullptr);
+
     CloseHandle(token);
 
     return TRUE;
 }
 
-DWORD
-CALLBACK
-ShutDownProc(LPVOID p)
+// Функция, которая выполнится, когда сработает таймер:
+DWORD CALLBACK ShutDownProc(LPVOID p)
 {
     PHANDLE timer = (PHANDLE)p;
 
     WaitForSingleObject(*timer, INFINITE);
     CloseHandle(*timer);
+
+    // Включить монитор:
     SetThreadExecutionState(ES_DISPLAY_REQUIRED);
 
     return 0;
 }
 
-WaitableTimer::WaitableTimer()
+// Выключить компьютер и проснуться через secs секунд:
+BOOL WINAPI WaitableTimer::HibernateAndReboot(int secs)
 {
-
-}
-
-BOOL
-WINAPI
-WaitableTimer::HibernateAndReboot(int secs)
-{
-    if(!_EnableShutDownPriv())
+    // Получение прав на выключение компьютера:
+    if (!_EnableShutDownPriv())
         return FALSE;
 
+    // Создание таймера пробуждения:
     HANDLE timer = CreateWaitableTimer(nullptr, TRUE, L"MyWaitableTimer");
-    if(timer == nullptr)
+    if (timer == nullptr)
         return FALSE;
 
     __int64 nanoSecs;
@@ -61,20 +63,30 @@ WaitableTimer::HibernateAndReboot(int secs)
     due.LowPart = (DWORD) (nanoSecs & 0xFFFFFFFF);
     due.HighPart = (LONG) (nanoSecs >> 32);
 
-    if(!SetWaitableTimer(timer, &due, 0, 0, 0, TRUE))
+    // Установка таймера пробуждения:
+    if (!SetWaitableTimer(timer, &due, 0, 0, 0, TRUE))
         return FALSE;
 
-    if(GetLastError() == ERROR_NOT_SUPPORTED)
+    // Если произошла ошибка:
+    if (GetLastError() == ERROR_NOT_SUPPORTED)
         return FALSE;
 
     HANDLE thread = CreateThread(nullptr, 0, ShutDownProc, &timer, 0, nullptr);
-    if(!thread)
+    if (!thread)
     {
         CloseHandle(timer);
         return FALSE;
     }
 
     CloseHandle(thread);
+
+    // Выключение компьютера:
     SetSystemPowerState(FALSE, FALSE);
+
     return TRUE;
+}
+
+// Конструктор:
+WaitableTimer::WaitableTimer()
+{
 }
