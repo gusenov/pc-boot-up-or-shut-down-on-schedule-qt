@@ -28,7 +28,6 @@ copy "%~1\libstdc++-6.dll" "%~2\" /B /V /Y
 copy "%~1\Qt5Core.dll" "%~2\" /B /V /Y
 copy "%~1\Qt5Widgets.dll" "%~2\" /B /V /Y
 copy "%~1\Qt5Gui.dll" "%~2\" /B /V /Y
-copy "%~1\Qt5Sqld.dll" "%~2\" /B /V /Y
 copy "%~1\Qt5Cored.dll" "%~2\" /B /V /Y
 copy "%~1\Qt5Widgetsd.dll" "%~2\" /B /V /Y
 copy "%~1\Qt5Guid.dll" "%~2\" /B /V /Y
@@ -39,7 +38,6 @@ rem libstdc++-6.dll        1,46 МБ
 rem Qt5Core.dll            5,89 МБ
 rem Qt5Widgets.dll         5,94 МБ
 rem Qt5Gui.dll             6,11 МБ
-rem Qt5Sqld.dll            8,31 МБ
 rem Qt5Cored.dll           115  МБ
 rem Qt5Widgetsd.dll        160  МБ
 rem Qt5Guid.dll            215  МБ
@@ -59,7 +57,6 @@ del "%~1\libstdc++-6.dll" /F /Q
 del "%~1\Qt5Core.dll" /F /Q
 del "%~1\Qt5Widgets.dll" /F /Q
 del "%~1\Qt5Gui.dll" /F /Q
-del "%~1\Qt5Sqld.dll" /F /Q
 del "%~1\Qt5Cored.dll" /F /Q
 del "%~1\Qt5Widgetsd.dll" /F /Q
 del "%~1\Qt5Guid.dll" /F /Q
@@ -80,7 +77,6 @@ rem -q     be quiet
  "%~1\Qt5Core.dll"^
  "%~1\Qt5Widgets.dll"^
  "%~1\Qt5Gui.dll"^
- "%~1\Qt5Sqld.dll"^
  "%~1\Qt5Cored.dll"^
  "%~1\Qt5Widgetsd.dll"^
  "%~1\Qt5Guid.dll"
@@ -91,7 +87,6 @@ rem libstdc++-6.dll        625  КБ
 rem Qt5Core.dll            2,57 МБ
 rem Qt5Widgets.dll         2,44 МБ
 rem Qt5Gui.dll             2,31 МБ
-rem Qt5Sqld.dll            1,93 МБ
 rem Qt5Cored.dll           27,1 МБ
 rem Qt5Widgetsd.dll        39,2 МБ
 rem Qt5Guid.dll            47,0 МБ
