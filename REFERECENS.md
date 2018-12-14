@@ -16,6 +16,7 @@
 - [c++ - Throwing exceptions from constructors - Stack Overflow](https://stackoverflow.com/questions/810839/throwing-exceptions-from-constructors)
 - [c++ - Constructor for '' must explicitly initialize the reference member '' - Stack Overflow](https://stackoverflow.com/questions/19576458/constructor-for-must-explicitly-initialize-the-reference-member)
 - [Why is conversion from string constant to 'char*' valid in C but invalid in C++ - Stack Overflow](https://stackoverflow.com/questions/20944784/why-is-conversion-from-string-constant-to-char-valid-in-c-but-invalid-in-c)
+- [c++ - How to implement static class member functions in *.cpp file? - Stack Overflow](https://stackoverflow.com/questions/5373107/how-to-implement-static-class-member-functions-in-cpp-file)
 
 ## static
 
@@ -122,6 +123,7 @@
 
 ### Programmatically
 
+- [How to wake up a PC using waitable timer. | 괴짜 프로그래머의 일상사~](http://www.jiniya.net/wp/archives/4910)
 - [java - Force startup a computer automatically? - Stack Overflow](https://stackoverflow.com/questions/15633393/force-startup-a-computer-automatically)
 - [Window 10 - c# code to wake and turn on monitor](https://social.msdn.microsoft.com/Forums/en-US/4b366a2a-2930-43f6-82a8-2dbfb76fd760/window-10-c-code-to-wake-and-turn-on-monitor?forum=csharpgeneral)
 - [How to programmatically schedule a wakeup when using AC power?](https://social.technet.microsoft.com/Forums/en-US/e015b444-f1ec-43aa-82f1-1159a7e58b2d/how-to-programmatically-schedule-a-wakeup-when-using-ac-power?forum=win10itprogeneral)
@@ -150,6 +152,14 @@
 - [How to Use QPushButton - Qt Wiki](https://wiki.qt.io/How_to_Use_QPushButton)
 - [In Qt C++, how can I fully disable resizing a window including the resize icon when the mouse hovers the border? - Stack Overflow](https://stackoverflow.com/questions/16673074/in-qt-c-how-can-i-fully-disable-resizing-a-window-including-the-resize-icon-w)
 - [c++ - Unable to compile QT Create Quick Application Project - Stack Overflow](https://stackoverflow.com/questions/43569947/unable-to-compile-qt-create-quick-application-project)
+- [How to stop a QTimer::singleShot | Qt Forum](https://forum.qt.io/topic/4752/how-to-stop-a-qtimer-singleshot)
+- [c++ - Using QT, how to call function once after a certain interval, even if more calls may occur? - Stack Overflow](https://stackoverflow.com/questions/14269766/using-qt-how-to-call-function-once-after-a-certain-interval-even-if-more-calls)
+- [c++ - How to convert QString to QDate in specific format? - Stack Overflow](https://stackoverflow.com/questions/34382384/how-to-convert-qstring-to-qdate-in-specific-format)
+- [QDateTime Class | Qt Core 5.12](http://doc.qt.io/qt-5/qdatetime.html#msecsTo)
+- [qt - How to get the difference between two QDateTimes in milliseconds? - Stack Overflow](https://stackoverflow.com/questions/3704106/how-to-get-the-difference-between-two-qdatetimes-in-milliseconds)
+- [QMessageBox Class | Qt 4.8](http://doc.qt.io/archives/qt-4.8/qmessagebox.html)
+- [c++ - QTimer to execute method every second - Stack Overflow](https://stackoverflow.com/questions/10667689/qtimer-to-execute-method-every-second)
+- [QTimer Class | Qt Core 5.12](http://doc.qt.io/qt-5/qtimer.html)
 
 # Power Management
 
