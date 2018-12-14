@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>160</width>
+    <height>258</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>ПК</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QPushButton" name="pushButtonApply">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>192</y>
+      <width>120</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Применить</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxShutDown">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>140</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Выключить компьютер</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelDateShutDown">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>40</y>
+      <width>32</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Дата</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelTimeShutDown">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>72</y>
+      <width>32</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Время</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelDateBootUp">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>131</y>
+      <width>32</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Дата</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelTimeBootUp">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>163</y>
+      <width>32</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Время</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxBootUp">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>101</y>
+      <width>140</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Включить компьютер</string>
+    </property>
+   </widget>
+   <widget class="QDateEdit" name="dateEditShutDown">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>37</y>
+      <width>100</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTimeEdit" name="timeEditShutDown">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>69</y>
+      <width>100</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="displayFormat">
+     <string>HH:mm:ss</string>
+    </property>
+   </widget>
+   <widget class="QDateEdit" name="dateEditBootUp">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>128</y>
+      <width>100</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTimeEdit" name="timeEditBootUp">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>160</y>
+      <width>100</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="displayFormat">
+     <string>HH:mm:ss</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonCancelAll">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>225</y>
+      <width>120</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Отменить всё</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
