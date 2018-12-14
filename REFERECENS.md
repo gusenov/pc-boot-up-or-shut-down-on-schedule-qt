@@ -139,6 +139,13 @@
 - [[MS-DTYP]: LPCWSTR](https://msdn.microsoft.com/en-us/library/cc230352.aspx)
 - [Get current username in C++ on Windows - Stack Overflow](https://stackoverflow.com/questions/11587426/get-current-username-in-c-on-windows)
 - [GetUserNameA function | Microsoft Docs](https://docs.microsoft.com/en-us/windows/desktop/api/winbase/nf-winbase-getusernamea)
+- [Структура FILETIME](http://www.vsokovikov.narod.ru/New_MSDN_API/Time/str_filetime.htm)
+- [SetWaitableTimer function | Microsoft Docs](https://docs.microsoft.com/en-us/windows/desktop/api/synchapi/nf-synchapi-setwaitabletimer)
+- [WaitForSingleObject function | Microsoft Docs](https://docs.microsoft.com/en-us/windows/desktop/api/synchapi/nf-synchapi-waitforsingleobject)
+- [AdjustTokenPrivileges function | Microsoft Docs](https://docs.microsoft.com/en-us/windows/desktop/api/securitybaseapi/nf-securitybaseapi-adjusttokenprivileges)
+- [LookupPrivilegeValue function (Windows)](https://msdn.microsoft.com/en-us/windows/desktop/aa379180)
+- [_LUID | Microsoft Docs](https://docs.microsoft.com/en-us/windows/desktop/api/winnt/ns-winnt-_luid)
+- [OpenProcessToken function | Microsoft Docs](https://docs.microsoft.com/en-us/windows/desktop/api/processthreadsapi/nf-processthreadsapi-openprocesstoken)
 
 # Qt
 
